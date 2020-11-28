@@ -8,7 +8,11 @@
 - [x] Vlastni jmena hracu
 - [x] Game over screen
 - [x] Fix shots
-- [ ] Make it look nice
+- [x] Make it look nice
+- [ ] TBD
 
-Pokud umis pracovat s Git/GitHubem, muzes ignorovat:  
-Nejjednodussi zpusob jak dostat tenhle kod k sobe je zelene tlacitko Code -> Download ZIP
+Pokud umis pracovat s Git/GitHubem:
+>git clone
+
+Jinak:
+>Nejjednodussi zpusob jak dostat tenhle kod k sobe je zelene tlacitko Code -> Download ZIP
