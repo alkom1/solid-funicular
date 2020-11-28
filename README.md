@@ -2,7 +2,7 @@
 - [x] Vykreslovani
 - [x] Pohyb tanku
 - [ ] Strileni
-- [ ] Stridani hracu
+- [x] Stridani hracu
 - [ ] Vyhra/Prohra
 - [ ] Znicitelny povrh
 - [ ] Vlastni jmena hracu
