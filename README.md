@@ -1,9 +1,9 @@
 - [x] Nahravani herniho planu
 - [x] Vykreslovani
 - [x] Pohyb tanku
-- [ ] Strileni
+- [x] Strileni
 - [x] Stridani hracu
-- [ ] Vyhra/Prohra
+- [x] Vyhra/Prohra
 - [ ] Znicitelny povrh
 - [ ] Vlastni jmena hracu
 - [ ] Game over screen
