@@ -1,4 +1,5 @@
 ﻿#include "stdafx.h"
+#include "tanks.h"
 //see that file
 
 //Struktura pro informace o hráčích
@@ -13,7 +14,6 @@ struct Hrac {
 	bool nazivu = true;
 };
 
-//Vytvoreni dynamicke 2D matice
 int** vytvorMatici(int m, int n) {
 	int** matrix = new int*[m];
 	for (int i = 0; i < m; i++)
@@ -22,6 +22,7 @@ int** vytvorMatici(int m, int n) {
 	}
 	return matrix;
 }
+
 
 //Naplneni matice nulami / Vynulování
 void inicializujMatici(int **matrix, int m, int n) {
@@ -61,12 +62,10 @@ void vykresliMatici(int **matrix, int m, int n) {
 	system("cls");
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	CONSOLE_SCREEN_BUFFER_INFO consoleInfo;
-	WORD saved_attributes;
+	WORD saved_attributes; //unsigned short
 
 	GetConsoleScreenBufferInfo(hConsole, &consoleInfo);
 	saved_attributes = consoleInfo.wAttributes;
-	int stringSize = ((n * 2) + 2) * m;
-	char *matrixString = new char[stringSize];
 
 	printf("\n");
 	SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN);
@@ -86,17 +85,17 @@ void vykresliMatici(int **matrix, int m, int n) {
 			}
 			else if (matrix[i][j] == ID_H1) {
 				//hrac 1
-				SetConsoleTextAttribute(hConsole, FOREGROUND_GREEN);
+				SetConsoleTextAttribute(hConsole, FOREGROUND_BLUE);
 				printf("A");
 			}
 			else if (matrix[i][j] == ID_H2) {
 				//hrac 2
-				SetConsoleTextAttribute(hConsole, FOREGROUND_GREEN);
+				SetConsoleTextAttribute(hConsole, FOREGROUND_BLUE);
 				printf("B");
 			}
 			//zbyle ID (TRAJ, TRAJ_DOPAD) by se nikdy nemeli vykreslovat touto funkci
 
-			SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN);
+			SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN); //that shits yellow
 			printf("|");
 
 		}
@@ -125,7 +124,7 @@ void vypisHerniInfo(int m, int n, struct Hrac* aktualniHrac, struct Hrac* hrac1,
 	if (aktualniHrac->id == hrac2->id) {
 		printf("Na tahu - ");
 	}
-	printf("%s: %d, palivo: %d, uhel: %d, sila: %d                ", hrac2->jmeno, hrac2->zivoty, hrac2->zbylePosuny, hrac2->uhel, hrac2->sila);
+	printf("%s: %d, palivo: %d, uhel: %d, sila: %d                ", hrac2->jmeno, hrac2->zivoty, hrac2->zbylePosuny, 180-hrac2->uhel, hrac2->sila);
 	fflush(stdin);
 
 	SetConsoleTextAttribute(hConsole, saved_attributes);
@@ -173,12 +172,12 @@ void vykresliBod(int **matrix, int y, int x, int id) {
 	}
 	else if (id == ID_H1) {
 		//hrac 1
-		SetConsoleTextAttribute(hConsole, FOREGROUND_GREEN);
+		SetConsoleTextAttribute(hConsole, FOREGROUND_BLUE);
 		printf("A");
 	}
 	else if (id == ID_H2) {
 		//hrac 2
-		SetConsoleTextAttribute(hConsole, FOREGROUND_GREEN);
+		SetConsoleTextAttribute(hConsole, FOREGROUND_BLUE);
 		printf("B");
 	}
 	fflush(stdin);
@@ -300,10 +299,11 @@ void vystrel(int ** matrix, int m, int n, struct Hrac* aktualniHrac, struct Hrac
 			continue;
 		}
 
-		int poleX = int(x);
+		int poleX = int(x); //20.3 -> 20
 		int poleY = int(y);
 
 		int pole = matrix[poleY][poleX];
+
 		if (pole == aktualniHrac->id) {
 			if (opusteniTanku) {
 				//Zásah
@@ -338,6 +338,7 @@ void vystrel(int ** matrix, int m, int n, struct Hrac* aktualniHrac, struct Hrac
 				if (pow(poleY - druhyHrac->y, 2) + pow(poleX - druhyHrac->x, 2) < pow(OKRUH_VYBUCHU, 2)) {
 					druhyHrac->zivoty -= SNIZENI_ZIVOTU * NASOBITEL_VYBUCHU;
 				}
+
 			}
 			//Gravitace
 			if (NICENI_POVRCHU) {
@@ -397,7 +398,6 @@ void vystrel(int ** matrix, int m, int n, struct Hrac* aktualniHrac, struct Hrac
 			vykresliBod(matrix, poleY, poleX, ID_TRAJ);
 		}
 	}
-
 }
 
 //Vycisti trajektorii z obrazovky
