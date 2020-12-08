@@ -1,0 +1,2 @@
+d:\tmp\hraTankyAnnotated\x64\Debug\hraTanky.exe
+d:\tmp\hraTankyAnnotated\x64\Debug\hraTanky.pdb

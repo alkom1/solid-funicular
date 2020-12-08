@@ -1,0 +1,4 @@
+C:\Users\Pepan\Desktop\221733Tanky\hraTanky\Debug\hraTanky.exe
+C:\Users\Pepan\Desktop\221733Tanky\hraTanky\Debug\hraTanky.pdb
+D:\tmp\hraTanky\Debug\hraTanky.exe
+D:\tmp\hraTanky\Debug\hraTanky.pdb
