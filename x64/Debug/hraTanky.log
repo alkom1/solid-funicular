@@ -1,6 +1,4 @@
 ﻿  funkceHry.cpp
-d:\tmp\hraTankyAnnotated\funkceHry.cpp(320,64): warning C4244: '-=': conversion from 'double' to 'int', possible loss of data
-d:\tmp\hraTankyAnnotated\funkceHry.cpp(323,61): warning C4244: '-=': conversion from 'double' to 'int', possible loss of data
-  hraTanky.cpp
-  Generating Code...
+d:\tmp\hraTankyAnnotated\funkceHry.cpp(352,64): warning C4244: '-=': conversion from 'double' to 'int', possible loss of data
+d:\tmp\hraTankyAnnotated\funkceHry.cpp(357,61): warning C4244: '-=': conversion from 'double' to 'int', possible loss of data
   hraTanky.vcxproj -> D:\tmp\hraTankyAnnotated\x64\Debug\hraTanky.exe

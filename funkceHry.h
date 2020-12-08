@@ -37,6 +37,8 @@
 #define ID_H1 2
 #define ID_H2 3
 
+#define ID_H1A 10
+
 #define ID_TRAJ 4
 #define ID_TRAJ_DOPAD 5
 

@@ -60,12 +60,8 @@ void vykresliMatici(int** matrix, int m, int n) {
 		printf(" |");
 		for (int j = 0; j < n; j++)
 		{
-			if (matrix[i][j] == ID_VZDUCH) {
-				//prazdno
-				//SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN);
-				printf(" ");
-			}
-			else if (matrix[i][j] == ID_ZEM) {
+			
+			if (matrix[i][j] == ID_ZEM) {
 				//zem
 				SetConsoleTextAttribute(hConsole, FOREGROUND_GREEN);
 				printf("Z");
@@ -79,6 +75,11 @@ void vykresliMatici(int** matrix, int m, int n) {
 				//hrac 2
 				SetConsoleTextAttribute(hConsole, FOREGROUND_BLUE);
 				printf("B");
+			}
+			else {
+				//prazdno
+				//SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN);
+				printf(" ");
 			}
 			//zbyle ID (TRAJ, TRAJ_DOPAD) by se nikdy nemeli vykreslovat touto funkci
 
@@ -99,7 +100,6 @@ void vypisHerniInfo(int m, int n, struct Hrac* aktualniHrac, struct Hrac* hrac1,
 
 	GetConsoleScreenBufferInfo(hConsole, &consoleInfo);
 	saved_attributes = consoleInfo.wAttributes;
-	//"magicke" konstanty pro vypoce spravne pozice bodu
 	//Mezery øeší problém s výpisem - pokud se z dvouciferného èísla stane jednociferné - tím se posune øádek (zkrátí) - nakonci by se vypsala "0", díky nìkolika mezerám se nakonci vypíš mezera
 	nastavPoziciKurzoru(1, 0);
 	if (aktualniHrac->id == hrac1->id) {
@@ -160,7 +160,8 @@ void vykresliBod(int** matrix, int y, int x, int id) {
 	else if (id == ID_H1) {
 		//hrac 1
 		SetConsoleTextAttribute(hConsole, FOREGROUND_BLUE);
-		printf("A");
+		//indexAKtualnihoHrace
+		printf("A"); // 065 - b
 	}
 	else if (id == ID_H2) {
 		//hrac 2
@@ -187,13 +188,15 @@ int posunHrace(int** matrix, int m, int n, char d, struct Hrac* aktualniHrac) {
 	if (xNew < 0 || xNew >= n) return 0;
 
 	if (matrix[yNew][xNew] == ID_H1 || matrix[yNew][xNew] == ID_H2) return 0; //prekazi nam tank
+
 	if (matrix[yNew][xNew] == ID_ZEM) {
 		//lezem do kopce
-		for (int newY = yNew; newY >= 0; newY--) {
-			if (matrix[newY][xNew] == ID_H1 || matrix[newY][xNew] == ID_H2) return 0; //prekazi nam tank
-			if (matrix[newY][xNew] == ID_VZDUCH) {
+		for (int YKteryPraveSkenuju = yNew; YKteryPraveSkenuju >= 0; YKteryPraveSkenuju--) {
+			if (matrix[YKteryPraveSkenuju][xNew] == ID_H1 || matrix[YKteryPraveSkenuju][xNew] == ID_H2) return 0; //prekazi nam tank
 
-				aktualniHrac->y = newY;
+			if (matrix[YKteryPraveSkenuju][xNew] == ID_VZDUCH) {
+
+				aktualniHrac->y = YKteryPraveSkenuju;
 				aktualniHrac->x = xNew;
 				vykresliBod(matrix, yOld, xOld, ID_VZDUCH);
 				vykresliBod(matrix, aktualniHrac->y, aktualniHrac->x, aktualniHrac->id);
@@ -203,10 +206,10 @@ int posunHrace(int** matrix, int m, int n, char d, struct Hrac* aktualniHrac) {
 	}
 	else {
 		//rovina nebo dolu
-		for (int newY = yNew; newY < m; newY++) {
-			if (matrix[newY][xNew] == ID_H1 || matrix[newY][xNew] == ID_H2) return 0; //prekazi nam tank
-			if (matrix[newY][xNew] == ID_ZEM) {
-				aktualniHrac->y = newY - 1;
+		for (int skenovaneY = yNew; skenovaneY < m; skenovaneY++) {
+			if (matrix[skenovaneY][xNew] == ID_H1 || matrix[skenovaneY][xNew] == ID_H2) return 0; //prekazi nam tank
+			if (matrix[skenovaneY][xNew] == ID_ZEM) {
+				aktualniHrac->y = skenovaneY - 1;
 				aktualniHrac->x = xNew;
 				vykresliBod(matrix, yOld, xOld, ID_VZDUCH);
 				vykresliBod(matrix, aktualniHrac->y, aktualniHrac->x, aktualniHrac->id);
@@ -244,6 +247,7 @@ void zmenZobrazeniKurzoru(bool showFlag)
 //zobrazi game over screen
 void vyhra(struct Hrac* vyherce, int** matrix, int m, int n) {
 
+	//skryjTrajektorii();
 	vykresliMatici(matrix, m, n);
 	if (vyherce != NULL) {
 		printf("\n %s VYHRÁVÁ!\n", vyherce->jmeno);
@@ -263,17 +267,22 @@ void vystrel(int** matrix, int m, int n, struct Hrac* aktualniHrac, struct Hrac*
 	//Výpoèet trajektorie - šikmý vrh:
 	const double krok = 1.0 / 1000;
 	int pocetKroku = 0;
-	double x0 = (double)(aktualniHrac->x) + 0.5;
-	double y0 = (double)(aktualniHrac->y) + 0.5;
+
+	//int.......... 10
+	//double....... 10.5
+
+	double x0 = aktualniHrac->x + 0.5;
+	double y0 = aktualniHrac->y + 0.5;
+
 	double vx = cos(stupneNaRadiany(aktualniHrac->uhel)) * aktualniHrac->sila;
-	double vy = sin(stupneNaRadiany(aktualniHrac->uhel)) * -aktualniHrac->sila;
+	double vy = sin(stupneNaRadiany(aktualniHrac->uhel)) * - aktualniHrac->sila;
 
 	double cas;
 	double x;
 	double y;
-	bool raketaOpustilaTank = false; //raketa neopustila tank
+	bool raketaOpustilaTank = false; //raketa neopustila tank //Kontrola 
 	while (1) {
-		pocetKroku++; //Kontrola 
+		pocetKroku++;
 		cas = krok * pocetKroku;
 		x = x0 + vx * cas;
 		y = y0 + vy * cas + (pow(cas, 2) * GRAVITACE) / 2;
@@ -286,10 +295,16 @@ void vystrel(int** matrix, int m, int n, struct Hrac* aktualniHrac, struct Hrac*
 			continue; //pokud je nahoøe nad mapu, raketa se vrátí 
 		}
 
+		//double 10.5; int(10.9) ->  10
+
 		int poleX = int(x); //zakrouhleni dolu
 		int poleY = int(y);
-
 		int pole = matrix[poleY][poleX];
+
+		//if (pole >= ID_H1);
+		//pole 11 -> hrac
+		// 11 - ID_H1 -> 1 -> poleHracu[1].zivoty--;
+
 		if (pole == aktualniHrac->id) { //Snížení životù po zásahu sám sebe
 			if (raketaOpustilaTank) {
 				//Zásah
@@ -304,69 +319,92 @@ void vystrel(int** matrix, int m, int n, struct Hrac* aktualniHrac, struct Hrac*
 		}
 		else if (pole == ID_ZEM) { //Zásah do zemì + nièení povrchu
 			if (NICENI_POVRCHU) { //Pokud je zapnuto
-				vykresliBod(matrix, poleY, poleX, ID_TRAJ_DOPAD); //vykresleni trajktorie
+				vykresliBod(matrix, poleY, poleX, ID_TRAJ_DOPAD); //vykresleni trajektorie
 
-				for (int a = max(0, poleY - OKRUH_VYBUCHU); a <= min(poleY + OKRUH_VYBUCHU, m - 1); a++) { //Od horní hranice okruhu výbuchu po spodní s kontrolou rozsahu mimo mapu a okruh výbuchu
-					for (int b = max(0, poleX - OKRUH_VYBUCHU); b <= min(poleX + OKRUH_VYBUCHU, n - 1); b++) { //Od leva doprava okruhu výbuchu 
-						if (pow(a - poleY, 2) + pow(b - poleX, 2) < pow(OKRUH_VYBUCHU, 2) && matrix[a][b] == ID_ZEM) { //v okoli vybuchu + v mapì
-							vykresliBod(matrix, a, b, ID_VZDUCH); //vykresli vzduch místo zemì
+				//TODO: del
+				for (int skenovaneY = poleY - OKRUH_VYBUCHU; skenovaneY <= poleY + OKRUH_VYBUCHU; skenovaneY++) { //Od horní hranice okruhu výbuchu po spodní s kontrolou rozsahu mimo mapu a okruh výbuchu
+					for (int skenovaneX = poleX - OKRUH_VYBUCHU; skenovaneX <= poleX + OKRUH_VYBUCHU; skenovaneX++) { //Od leva doprava okruhu výbuchu 
+						//(Y-y)^2 + (X-x)^2 < R^2
+						//A^2 + B^2 = C^2
+						if (pow(skenovaneY - poleY, 2) + pow(skenovaneX - poleX, 2) < pow(OKRUH_VYBUCHU, 2) && matrix[skenovaneY][skenovaneX] == ID_ZEM) { //v okoli vybuchu + v mapì
+							vykresliBod(matrix, skenovaneY, skenovaneX, ID_VZDUCH); //vykresli vzduch místo zemì
+						}
+					}
+				}
+				
+				//////////////////
+				//max(0, poleY - OKRUH_VYBUCHU)
+				//max(0, -2) -> 0
+
+				//0..m-1
+				for (int skenovaneY = max(0, poleY - OKRUH_VYBUCHU); skenovaneY <= min(poleY + OKRUH_VYBUCHU, m - 1); skenovaneY++) { //Od horní hranice okruhu výbuchu po spodní s kontrolou rozsahu mimo mapu a okruh výbuchu
+					for (int skenovaneX = max(0, poleX - OKRUH_VYBUCHU); skenovaneX <= min(poleX + OKRUH_VYBUCHU, n - 1); skenovaneX++) { //Od leva doprava okruhu výbuchu s kontrolou rozsahu mimo mapu a okruh výbuchu
+						if (matrix[skenovaneY][skenovaneX] == ID_ZEM && pow(skenovaneY - poleY, 2) + pow(skenovaneX - poleX, 2) < pow(OKRUH_VYBUCHU, 2)) { //v okoli vybuchu
+							vykresliBod(matrix, skenovaneY, skenovaneX, ID_VZDUCH); //vykresli vzduch místo zemì
 						}
 					}
 				}
 			}
 			//Poškození v okolí výbuchu
 			if (POSKOZENI_V_OKOLI_DOPADU) {
+
 				if (pow(poleY - aktualniHrac->y, 2) + pow(poleX - aktualniHrac->x, 2) < pow(OKRUH_VYBUCHU, 2)) { //pozice hráèe je uvnitø okruhu výbuchu
-					aktualniHrac->zivoty -= SNIZENI_ZIVOTU * NASOBITEL_VYBUCHU; //èásteèný demage
+					aktualniHrac->zivoty -= SNIZENI_ZIVOTU * NASOBITEL_VYBUCHU; //èásteèný demage //dmg_mult
 				}
+
+
 				if (pow(poleY - druhyHrac->y, 2) + pow(poleX - druhyHrac->x, 2) < pow(OKRUH_VYBUCHU, 2)) {
 					druhyHrac->zivoty -= SNIZENI_ZIVOTU * NASOBITEL_VYBUCHU;
 				}
+
+				//1) projit vsechny -> vzdalenost
+				//2) for -> for
 			}
 			//Gravitace
 			if (NICENI_POVRCHU) {
-				for (int b = max(0, poleX - OKRUH_VYBUCHU); b <= min(poleX + OKRUH_VYBUCHU, n - 1); b++) {
+				for (int skenoveX = max(0, poleX - OKRUH_VYBUCHU); skenoveX <= min(poleX + OKRUH_VYBUCHU, n - 1); skenoveX++) {
 					int povrch = m; //Mapa zaèíná na souøadnicích 0,0; "m" je 1. øádek pod mapou (m jsou øádky)
-					for (int a = m - 1; a >= 0; a--) { //zaèni od posledního øádku mapy; jeï dokud se nedostaneš na 0 øádek (zaèátek/vršek mapy)
-						if (povrch == a + 1) {
-							//Pokud se tank propadl (souèadnice øádku se zvìtšila) - zkus jestli je tank v mapì
-							if (matrix[a][b] == ID_ZEM) {
-								povrch = a; //pokud se tank stále nachází "v mapì" -> dej do "povrch" jeho novou pozici øádku
+					for (int skenovaneY = m - 1; skenovaneY >= 0; skenovaneY--) { //zaèni od posledního øádku mapy; jeï dokud se nedostaneš na 0 øádek (zaèátek/vršek mapy)
+						if (povrch == skenovaneY + 1) {
+							if (matrix[skenovaneY][skenoveX] == ID_ZEM) {
+								povrch = skenovaneY; //pokud se tank stále nachází "v mapì" -> dej do "povrch" jeho novou pozici øádku
 							}
 						}
+						// pevna zem neni pod nama
 						else {
 							if (povrch == m) { //Povrch -> mimo mapu
 								//void:
-								if (aktualniHrac->id == matrix[a][b]) {
-									vykresliBod(matrix, a, b, ID_VZDUCH);
+								if (aktualniHrac->id == matrix[skenovaneY][skenoveX]) {
+									vykresliBod(matrix, skenovaneY, skenoveX, ID_VZDUCH);
 									aktualniHrac->nazivu = false; //"zabij" hraèe
 								}
-								else if (druhyHrac->id == matrix[a][b]) {
-									vykresliBod(matrix, a, b, ID_VZDUCH);
+								else if (druhyHrac->id == matrix[skenovaneY][skenoveX]) {
+									vykresliBod(matrix, skenovaneY, skenoveX, ID_VZDUCH);
 									druhyHrac->nazivu = false;
 								}
-								else if (matrix[a][b] == ID_ZEM) { //vymaž vše ostatní
-									vykresliBod(matrix, a, b, ID_VZDUCH);
+								else { //vymaž vše ostatní
+									vykresliBod(matrix, skenovaneY, skenoveX, ID_VZDUCH);
 								}
 							}
-							else {
+							else { //pevna zem je v ramci sveta
+								//povrch--;
 								//pøesun tanku a povrchu po znièení/zmìnì povrchu
-								if (aktualniHrac->id == matrix[a][b]) { //hráè je v mapì
+								if (aktualniHrac->id == matrix[skenovaneY][skenoveX]) { //hráè je v mapì
 									povrch--; //povrch hráèe se tímto nastaví nad pozici zemì
 									aktualniHrac->y = povrch; //tank nastav na tuto pozici
-									vykresliBod(matrix, a, b, ID_VZDUCH); //vykresli vzdych tam kde hráè byl
-									vykresliBod(matrix, povrch, b, aktualniHrac->id); //vykresli hráèe nad políèkem zemì
+									vykresliBod(matrix, skenovaneY, skenoveX, ID_VZDUCH); //vykresli vzdych tam kde hráè byl
+									vykresliBod(matrix, povrch, skenoveX, aktualniHrac->id); //vykresli hráèe nad políèkem zemì
 								}
-								else if (druhyHrac->id == matrix[a][b]) {
+								else if (druhyHrac->id == matrix[skenovaneY][skenoveX]) {
 									povrch--;
 									druhyHrac->y = povrch;
-									vykresliBod(matrix, a, b, ID_VZDUCH);
-									vykresliBod(matrix, povrch, b, druhyHrac->id);
+									vykresliBod(matrix, skenovaneY, skenoveX, ID_VZDUCH);
+									vykresliBod(matrix, povrch, skenoveX, druhyHrac->id);
 								}
-								else if (matrix[a][b] == ID_ZEM) {
+								else if (matrix[skenovaneY][skenoveX] == ID_ZEM) {
 									povrch--;
-									vykresliBod(matrix, a, b, ID_VZDUCH);
-									vykresliBod(matrix, povrch, b, ID_ZEM);
+									vykresliBod(matrix, skenovaneY, skenoveX, ID_VZDUCH);
+									vykresliBod(matrix, povrch, skenoveX, ID_ZEM);
 								}
 							}
 						}

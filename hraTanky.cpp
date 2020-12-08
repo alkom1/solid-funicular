@@ -7,6 +7,18 @@ Dokud nekdo nevyhraje:
 	Key press
 	Provest danou akci
 	pokud vystrelil, ukoncit tah
+
+1.
+pocet hracu
+Pole Hracu
+ID
+Index aktualniho hrace - int
+
+if (aktualni) -> if (ID_TOHO_POLE >= ID_PRVNIHO_HRACE)
+
+index = ID_NEJAKYHO_HRACE - ID_PRVNIHO_HRACE
+
+
 */
 
 int main()
@@ -14,6 +26,8 @@ int main()
 	//m = radky, n = sloupce
 	//m = y, n = x
 	int m, n;
+
+	int pocet = 2;
 
 	struct Hrac hrac1;
 	hrac1.id = ID_H1;
@@ -25,6 +39,8 @@ int main()
 	fgets(hrac1.jmeno, 50, stdin);
 	if ((strlen(hrac1.jmeno) > 0) && (hrac1.jmeno[strlen(hrac1.jmeno) - 1] == '\n'))
 		hrac1.jmeno[strlen(hrac1.jmeno) - 1] = '\0';
+
+	
 
 	struct Hrac hrac2;
 	hrac2.id = ID_H2;
@@ -39,8 +55,7 @@ int main()
 
 	int** matrix;
 
-	struct Hrac* aktualniHrac;
-	struct Hrac* druhyHrac;
+	int indexAktualnihoHrace = 0; //1 2 0 1 2
 
 	FILE* game_plan_in; 
 	errno_t err = fopen_s(&game_plan_in, "mapa.txt", "r");
@@ -73,8 +88,8 @@ int main()
 		counter -= jednoduchyCasovac(1);
 	}
 
-	aktualniHrac = &hrac1;
-	druhyHrac = &hrac2;
+	struct Hrac* aktualniHrac = &hrac1;
+	struct Hrac* druhyHrac = &hrac2;
 	vykresliMatici(matrix, m, n); //vykreslení mapy
 
 	unsigned int key;
@@ -150,6 +165,14 @@ int main()
 			break;
 		}
 
+		//pocet hracu nazivu
+		//for polehrace
+		//if hrac.nazivu pocethracunazivu++
+
+		//pocetnaz == 0 
+		//pocetnaz == 1
+		//pocetnaz > 1 hra pokracuje
+
 		//ošetření rozsahu síly a úhlu
 		if (aktualniHrac->uhel < MIN_UHEL) aktualniHrac->uhel = MIN_UHEL;
 		if (aktualniHrac->uhel > MAX_UHEL) aktualniHrac->uhel = MAX_UHEL;
@@ -160,6 +183,9 @@ int main()
 			if (aktualniHrac->id == hrac1.id) { //prohození rolí
 				aktualniHrac = &hrac2; //hrát bude hráč2
 				druhyHrac = &hrac1; //2. čeká
+				
+				//modulo = % = zbytek po deleni
+				//aktalniHrac = poleHracu[indexsjndajhsdns];
 			}
 			else { //jinak hraje hráč 1
 				aktualniHrac = &hrac1;
